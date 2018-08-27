@@ -53,7 +53,7 @@ ListNode *createListNode(ListNode **listNode)
  * 添加节点
  */
 static int counter=0;
-ListNode * addListNode(ListNode *pHead,int data)
+ListNode * addListNode(ListNode **pHead,int data)
 {
 	if (pHead==NULL)
 	{
@@ -61,8 +61,8 @@ ListNode * addListNode(ListNode *pHead,int data)
 	}
 	ListNode *newNode = (ListNode *)malloc(sizeof(ListNode));
 	newNode->data = data;
-	newNode->next = pHead;
-	pHead = newNode;
+	newNode->next = *pHead;
+	*pHead = newNode;
 	++counter;
 	return newNode;
 }
@@ -71,14 +71,14 @@ ListNode * addListNode(ListNode *pHead,int data)
 /**
  * 在指定节点前面插入新节点
  */
-ListNode *addListNodeByIndex(ListNode *pHead, int index,int value)
+ListNode *addListNodeByIndex(ListNode **pHead, int index,int value)
 {
 	if (pHead==NULL)
 	{
 		return;
 	}
 	ListNode *tmp = NULL;
-	tmp = pHead;
+	tmp = *pHead;
 	ListNode *newListNode = NULL;
 	ListNode *pTmp = NULL;
 	while (tmp->data!=0&&tmp)
@@ -102,8 +102,8 @@ ListNode *addListNodeByIndex(ListNode *pHead, int index,int value)
 	{
 		newListNode = (ListNode *)malloc(sizeof(ListNode));
 		newListNode->data = value;
-		newListNode->next = pHead;
-		pHead = newListNode;
+		newListNode->next = *pHead;
+		*pHead = newListNode;
 		++counter;
 	}
 	return newListNode;
@@ -112,35 +112,26 @@ ListNode *addListNodeByIndex(ListNode *pHead, int index,int value)
 
 void listNode_Reverise(ListNode *pHead)
 {
-	if (pHead=NULL)
+	if (NULL==pHead)
 	{
 		return;
 	}
 
 	ListNode *tmp=NULL;
-	tmp = pHead;
-	ListNode *p = NULL;
-	while (tmp)
+	ListNode *pre = NULL;
+	ListNode *cur = NULL;
+	pre = pHead;
+	cur = pHead->next;
+	while (cur->next!=NULL)
 	{
-		if (NULL==tmp->next)
-		{
-			p = tmp;
-		}
+		tmp = cur->next;
+		cur->next = pre;
+		pre = cur;
+		cur = tmp;
 	}
-
-	pHead->next = p;
-
-	ListNode *ptmp = NULL;
-	tmp = pHead;
-	while (tmp)
-	{
-		ptmp = tmp->next;
-		ptmp->next = tmp;
-		tmp = tmp->next;
-	}
-	p->next = NULL;
-	p->data = 0;
-
+	pHead->next->next = NULL;
+	pHead->next = pre;
+	
 }
 
 /**
@@ -199,7 +190,7 @@ void listNode_Print(ListNode *pHead)
 	}
 	ListNode *tmp = NULL;
 	tmp = pHead;
-	while (tmp&&tmp->data!=0)
+	while (tmp)
 	{
 		printf("%d ", tmp->data);
 		tmp = tmp->next;
@@ -209,26 +200,26 @@ void listNode_Print(ListNode *pHead)
 
 
 
-int main()
+int main01()
 {
 	ListNode *pHead = NULL;
 	
 	createListNode(&pHead);
 	ListNode *tmpHead = pHead;
-	pHead = addListNode(pHead, 10);
-	pHead = addListNode(pHead, 20);
-	pHead = addListNode(pHead, 30);
-	pHead = addListNode(pHead, 40);
-	pHead = addListNode(pHead, 50);
+	addListNode(&pHead, 10);
+	addListNode(&pHead, 20);
+	addListNode(&pHead, 30);
+	addListNode(&pHead, 40);
+	addListNode(&pHead, 50);
 	printf("%d\n", counter);
 	listNode_Print(pHead);
-
-	addListNodeByIndex(pHead, 30, 60);
+	printf("\n");
+	addListNodeByIndex(&pHead, 30, 60);
 	printf("%d\n", counter);
 	printf("\n");
 	listNode_Print(pHead);
 
-
+	printf("\n");
 
 
 	listNode_Reverise(pHead);
@@ -239,5 +230,31 @@ int main()
 	//tmpHead = NULL;
 	//pHead = NULL;
 	//listNode_Print(pHead);
+	return 0;
+}
+
+
+/**
+ * 1.const修饰的全局变量(普通和静态)都是放在常量区的,任何方式都不能修改
+ * 2.const修饰的局部变量不是放在常量区,而是放在栈区,可以被修改;
+ */
+const int a = 10;
+const static int c=10;
+int main()
+{
+	int *p = NULL;
+	p = &a;
+//	*p = 100; //段错误,不能通过这种形式修改const修饰的全局变量
+	printf("a=%d\n", a);
+	p = NULL;
+
+	const int b = 10;
+	p = &b;
+	*p = 100;//但是可以通过这种形式修改const修饰的局部变量
+	printf("b=%d\n", b);
+	p = NULL;
+	p = &c;
+//	*p = 100;//也不能通过这种形式修改const修饰的静态全局变量
+	printf("c=%d\n", b);
 	return 0;
 }
